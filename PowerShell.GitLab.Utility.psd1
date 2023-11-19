@@ -30,7 +30,7 @@ CompanyName = 'Free Lancer'
 Copyright = '(c) Chendrayan Venkatesan. All rights reserved.'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'This PowerShell utility to work with GitLab, and the cmdlets are built using the GrpahQL.'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
