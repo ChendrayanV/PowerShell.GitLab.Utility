@@ -1,0 +1,15 @@
+name: Publish PowerShell Module
+
+on: push
+
+jobs:
+  publish-to-gallery:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish
+        env:
+          NUGET_KEY: $PS_GALLERY_KEY
+        shell: pwsh
+        run: |
+          Publish-Module -Path . -NuGetApiKey ${{secrets.PS_GALLERY_KEY}} -Verbose
