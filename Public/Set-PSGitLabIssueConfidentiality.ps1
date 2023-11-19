@@ -36,6 +36,6 @@ function Set-PSGitLabIssueConfidentiality {
     $response.errors.message
   }
   else {
-    $response.data.createIssue.issue
+    $response.data.issueSetConfidential.issue
   }
 }

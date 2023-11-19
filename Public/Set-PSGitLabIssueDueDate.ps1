@@ -35,6 +35,6 @@ function Set-PSGitLabIssueDueDate {
         Write-Error -Message $($response.errors.message) -InformationAction Continue
     }
     else {
-        $response.data.createIssue.issue
+        $response.data.issueSetDueDate.issue
     }
 }

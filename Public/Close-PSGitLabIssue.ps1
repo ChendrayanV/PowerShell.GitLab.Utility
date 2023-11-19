@@ -15,11 +15,12 @@ function Close-PSGitLabIssue {
         query = @"
             mutation {
                 updateIssue(input: {projectPath: "$($ProjectFullPath)", iid: "$($IID)", stateEvent:CLOSE}) {
-                issue {
-                    id
-                    iid
-                    
-                }
+                    issue {
+                        id
+                        iid
+                        state
+                    }
+                    errors
                 }
             }
 "@
@@ -31,6 +32,6 @@ function Close-PSGitLabIssue {
         Write-Error -Message $($response.errors.message) -InformationAction Continue
     }
     else {
-        $response.data.createIssue.issue
+        $response.data.updateIssue.issue
     }
 }
