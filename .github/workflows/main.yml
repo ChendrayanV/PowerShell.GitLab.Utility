@@ -5,11 +5,11 @@ on: push
 jobs:
   pester-test:
     name: Pester test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Perform a Pester test from the Tests.ps1 file
+      - name: Perform a Pester test
         shell: pwsh
         run: |
           Invoke-Pester -Script .\tests\ -Output Detailed
