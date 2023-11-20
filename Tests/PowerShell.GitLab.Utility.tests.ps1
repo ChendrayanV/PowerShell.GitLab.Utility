@@ -13,7 +13,11 @@ Describe -Name 'PowerShell.GitLab.Utility' -Fixture {
         }
     }
 
-    
+    Context -Name 'Test ' -Fixture {
+        It -Name 'Test for failures' {
+            1 | Should -BeExactly 2
+        }
+    }
 }
 
 AfterAll -Scriptblock {
