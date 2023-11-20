@@ -1,16 +1,16 @@
 function Close-PSGitLabIssue {
     <#
     .SYNOPSIS
-        A short one-line action-based description, e.g. 'Tests if a function is valid'
+        A PowerShell cmdlet to close the GitLab issue.
     .DESCRIPTION
-        A longer description of the function, its purpose, common use cases, etc.
+        A PowerShell cmdlet to close the GitLab issue.
     .NOTES
-        Information or caveats about the function e.g. 'This function is not supported in Linux'
+        Author: Chendrayan Venkatesan
     .LINK
-        Specify a URI to a help page, this will show when Get-Help -Online is used.
+        https://docs.gitlab.com/ee/api/graphql/reference/#mutationupdateissue
     .EXAMPLE
-        Test-MyTestFunction -Verbose
-        Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+        Close-PSGitLabIssue -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXX' -ProjectFullPath 'group/projectpath' -IID 1
+
     #>
     
     
