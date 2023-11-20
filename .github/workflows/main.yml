@@ -6,12 +6,12 @@ jobs:
   pester-test:
     name: Pester test
     runs-on: windows-latest
-    continue-on-error: false
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Perform a Pester test
         shell: pwsh
+        continue-on-error: false
         run: |
           Invoke-Pester -Script .\tests\ -Output Detailed
 
