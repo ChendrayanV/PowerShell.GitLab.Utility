@@ -6,6 +6,7 @@ jobs:
   pester-test:
     name: Pester test
     runs-on: windows-latest
+    continue-on-error: false
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
