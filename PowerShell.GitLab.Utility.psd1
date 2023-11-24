@@ -12,7 +12,7 @@
 RootModule = '.\PowerShell.GitLab.Utility.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.2'
+ModuleVersion = '0.0.3'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -30,7 +30,7 @@ CompanyName = 'Free Lancer'
 Copyright = '(c) Chendrayan Venkatesan. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'This PowerShell utility to work with GitLab, and the cmdlets are built using the GrpahQL.'
+Description = 'This PowerShell utility to work with GitLab, and the cmdlets are built using the GraphQL.'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''

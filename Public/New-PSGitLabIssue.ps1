@@ -5,12 +5,12 @@ function New-PSGitLabIssue {
   .DESCRIPTION
       A PowerShell cmdlet to create a GitLab issue.
   .NOTES
-      Author: Chendrayan Venkatesan
-      Email: chendrayan.exchange@hotmail.com
+      Author : Chendrayan Venkatesan
+      Email  : Chendrayan.Exchange@hotmail.com
   .LINK
       https://docs.gitlab.com/ee/api/graphql/reference/#mutationcreateissue
   .EXAMPLE
-      Set-PSGitLabIssueDueDate -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXXX' -ProjectFullPath 'group/projectpath' -IID 5 -DueDate '29-11-2023'
+      New-PSGitLabIssue -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXXX' -ProjectFullPath 'group/projectpath' -Title 'First Issue'
   #>
   
   

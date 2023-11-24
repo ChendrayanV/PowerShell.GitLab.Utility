@@ -5,7 +5,8 @@ function Close-PSGitLabIssue {
     .DESCRIPTION
         A PowerShell cmdlet to close the GitLab issue.
     .NOTES
-        Author: Chendrayan Venkatesan
+        Author : Chendrayan Venkatesan
+        Email  : Chendrayan.Exchange@hotmail.com 
     .LINK
         https://docs.gitlab.com/ee/api/graphql/reference/#mutationupdateissue
     .EXAMPLE

@@ -1,17 +1,19 @@
 function Set-PSGitLabIssueConfidentiality {
   <#
   .SYNOPSIS
-    A short one-line action-based description, e.g. 'Tests if a function is valid'
+    A PowerShell cmdlet to set the GitLab issue confidentiality.
   .DESCRIPTION
-    A longer description of the function, its purpose, common use cases, etc.
+    A PowerShell cmdlet to set the GitLab issue confidentiality.
   .NOTES
-    Information or caveats about the function e.g. 'This function is not supported in Linux'
+    Author : Chendrayan Venkatesan
+    Email  : Chendrayan.Exchange@hotmail.com
   .LINK
-    Specify a URI to a help page, this will show when Get-Help -Online is used.
+    https://docs.gitlab.com/ee/api/graphql/reference/#mutationissuesetconfidential
   .EXAMPLE
-    Test-MyTestFunction -Verbose
-    Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
+    Set-PSGitLabIssueConfidentiality -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXXX' -ProjectFullPath 'group/projectpath' -IID 5 -Confidential 'true'
   #>
+  
+  
   
   
   [CmdletBinding()]

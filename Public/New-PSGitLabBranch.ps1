@@ -1,4 +1,4 @@
-function Set-PSGitLabIssueDueDate {
+function New-PSGitLabBranch {
     <#
     .SYNOPSIS
         A short one-line action-based description, e.g. 'Tests if a function is valid'
@@ -9,47 +9,49 @@ function Set-PSGitLabIssueDueDate {
     .LINK
         Specify a URI to a help page, this will show when Get-Help -Online is used.
     .EXAMPLE
-        Set-PSGitLabIssueDueDate -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXXX' -ProjectFullPath 'group/projectpath' -IID 5 -DueDate '29-11-2023'
+        New-PSGitLabBranch -OrganizationName 'gitlab.com' -PrivateToken 'XXXXXX' -ProjectFullPath 'group/projectfullpath' -BranchName 'branchname' -SourceBranchName 'main'
         Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
     #>
     
     
     [CmdletBinding()]
     param (
-        
+        [string]
         $OrganizationName,
 
+        [string]
         $PrivateToken,
 
+        [string]
         $ProjectFullPath,
 
-        $IID,
+        [string]
+        $BranchName,
 
-        $DueDate
+        [string]
+        $SourceBranchName
     )
     
-    $Query = @{
+    $query = @{
         query = @"
             mutation {
-                issueSetDueDate(input: {projectPath:"$($ProjectFullPath)", iid:"$($IID)", dueDate: "$($DueDate)" }) {
-                  issue {
-                    id
-                    iid
-                    dueDate
-                    state
-                  }
-                  errors
+                createBranch(input: {projectPath: "$($ProjectFullPath)", name: "$($BranchName)", ref: "$($SourceBranchName)"}) {
+                branch {
+                    name
                 }
-              }
+                errors
+                }
+            }
+                    
 "@
-    } | ConvertTo-Json -Compress
-        
+    } | ConvertTo-Json 
+
     $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-        
+    
     if ($response.errors) {
         Write-Error -Message $($response.errors.message) -InformationAction Continue
     }
     else {
-        $response.data.issueSetDueDate.issue
+        $response.data.createBranch.branch
     }
 }

@@ -3,7 +3,7 @@ param (
 )
 
 BeforeAll -Scriptblock {
-    Import-Module .\PowerShell.GitLab.Utility.psd1 
+    Import-Module .\PowerShell.GitLab.Utility.psd1 -Force
 }
 
 Describe -Name 'PowerShell.GitLab.Utility' -Fixture {
@@ -13,11 +13,15 @@ Describe -Name 'PowerShell.GitLab.Utility' -Fixture {
         }
     }
 
-    Context -Name 'Test ' -Fixture {
-        It -Name 'Test for failures' {
-            1 | Should -BeExactly 2
+    Context -Name 'Existance of Examples' -Fixture {
+        It -Name 'All cmdlets should have minimum 1 example' {
+            $Cmdlets = Get-Command -Module PowerShell.GitLab.Utility
+            foreach($Cmdlet in $Cmdlets) {
+                (Get-Help $($Cmdlet)).Examples.Count | Should -BeExactly 1
+            }
         }
     }
+    
 }
 
 AfterAll -Scriptblock {
