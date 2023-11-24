@@ -11,7 +11,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Perform a Pester test
         shell: pwsh
-        continue-on-error: false
         run: |
           Invoke-Pester -Script .\tests\ -Output Detailed
 
@@ -20,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Publish
-        if: steps.Perform-a-Pester-test == 'success'
         env:
           NUGET_KEY: $PS_GALLERY_KEY
         shell: pwsh

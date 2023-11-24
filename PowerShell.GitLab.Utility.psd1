@@ -101,13 +101,13 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/ChendrayanV/PowerShell.GitLab.Utility'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'This module is a Minimal Vialble Product (MVP)'
 
         # Prerelease string of this module
         # Prerelease = ''
