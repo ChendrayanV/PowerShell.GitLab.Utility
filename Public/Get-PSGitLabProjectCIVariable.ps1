@@ -1,4 +1,4 @@
-function Get-PSGitLabProjectCICDVariable {
+function Get-PSGitLabProjectCIVariable {
     <#
     .SYNOPSIS
       A short one-line action-based description, e.g. 'Tests if a function is valid'
