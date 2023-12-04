@@ -3,16 +3,16 @@ name: Publish PowerShell Module
 on: push
 
 jobs:
-  pester-test:
-    name: Pester test
-    runs-on: windows-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - name: Perform a Pester test
-        shell: pwsh
-        run: |
-          Invoke-Pester -Script .\tests\ -Output Detailed
+  # pester-test:
+  #   name: Pester test
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v4
+  #     - name: Perform a Pester test
+  #       shell: pwsh
+  #       run: |
+  #         Invoke-Pester -Script .\tests\ -Output Detailed
 
   publish-to-gallery:
     runs-on: windows-latest

@@ -24,13 +24,17 @@ function Close-PSGitLabIssue {
   
         $ProjectFullPath,
   
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [int[]]
         $IID
     )
       
-    $Query = @{
-        query = @"
+    process {
+        foreach ($item in $IID) {
+            $Query = @{
+                query = @"
             mutation {
-                updateIssue(input: {projectPath: "$($ProjectFullPath)", iid: "$($IID)", stateEvent:CLOSE}) {
+                updateIssue(input: {projectPath: "$($ProjectFullPath)", iid: "$($item)", stateEvent:CLOSE}) {
                     issue {
                         id
                         iid
@@ -40,14 +44,17 @@ function Close-PSGitLabIssue {
                 }
             }
 "@
-    } | ConvertTo-Json -Compress
+            } | ConvertTo-Json -Compress
       
-    $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+            $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
       
-    if ($response.errors) {
-        Write-Error -Message $($response.errors.message) -InformationAction Continue
+            if ($response.errors) {
+                Write-Error -Message $($response.errors.message) -InformationAction Continue
+            }
+            else {
+                $response.data.updateIssue.issue
+            }
+        }
     }
-    else {
-        $response.data.updateIssue.issue
-    }
+
 }

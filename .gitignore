@@ -3,3 +3,5 @@ Tests/script.ps1
 config/config.json
 
 assignments
+
+GraphQL/
