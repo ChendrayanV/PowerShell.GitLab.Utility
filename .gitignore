@@ -5,3 +5,5 @@ config/config.json
 assignments
 
 GraphQL/
+
+Tests/*

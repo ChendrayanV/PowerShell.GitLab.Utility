@@ -1,21 +1,22 @@
 function Get-PSGitLabGroupProject {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        $OrganizationName,
+  [CmdletBinding()]
+  param (
+    [Parameter(Mandatory)]
+    $OrganizationName,
 
-        [Parameter(Mandatory)]
-        $PrivateToken,
+    [Parameter(Mandatory)]
+    $PrivateToken,
 
-        [Parameter(Mandatory)]
-        $GroupFullPath
-    )
-    
+    [Parameter(Mandatory)]
+    $GroupFullPath
+  )
+  $checkGroupExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -GroupFullPath $($GroupFullPath)
+  if ($checkGroupExists -eq $true) {
     $Query = @{
-        query = @"
+      query = @"
         query {
             group(fullPath: "$($GroupFullPath)") {
-              projects(first:5, after: null) {
+              projects(includeSubgroups: true,first:5, after: null) {
                 pageInfo {
                   hasNextPage
                   endCursor
@@ -46,12 +47,13 @@ function Get-PSGitLabGroupProject {
     $collection = @()
 
     while ($true) {
-        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-        $Query = @{
-            query = @"
+      $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+        
+      $Query = @{
+        query = @"
             query {
                 group(fullPath: "$($GroupFullPath)") {
-                  projects(first:5, after: "$($response.data.group.projects.pageInfo.endCursor)") {
+                  projects(includeSubgroups: true,first:5, after: "$($response.data.group.projects.pageInfo.endCursor)") {
                     pageInfo {
                       hasNextPage
                       endCursor
@@ -78,12 +80,16 @@ function Get-PSGitLabGroupProject {
               }
                   
 "@
-        } | ConvertTo-Json -Compress
-        $collection += $response
-        if ($response.data.group.projects.pageInfo.hasNextPage -eq $false) {
-            break 
-        }
+      } | ConvertTo-Json -Compress
+      $collection += $response
+      if ($response.data.group.projects.pageInfo.hasNextPage -eq $false) {
+        break 
+      }
     }
     $collection.data.group.projects.nodes
-
+  }
+  else {
+    #  Write-Information -MessageData "The group is not found" -InformationAction Continue
+    Write-Warning -Message "The group $($GroupFullPath) is not found. Contact the GitLab administrator" -InformationAction Continue
+  }
 }

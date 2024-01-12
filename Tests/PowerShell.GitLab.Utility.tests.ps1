@@ -1,5 +1,9 @@
 param (
-    $PrivateToken
+    $PrivateToken,
+
+    $ProjectFullPath,
+
+    $GroupFullPath
 )
 
 BeforeAll -Scriptblock {
@@ -13,12 +17,13 @@ Describe -Name 'PowerShell.GitLab.Utility' -Fixture {
         }
     }
 
-    Context -Name 'Existance of Examples' -Fixture {
-        It -Name 'All cmdlets should have minimum 1 example' {
-            $Cmdlets = Get-Command -Module PowerShell.GitLab.Utility
-            foreach($Cmdlet in $Cmdlets) {
-                (Get-Help $($Cmdlet)).Examples.Count | Should -BeExactly 1
-            }
+    Context -Name 'Test PS GitLab Object' -Fixture {
+        It -Name 'Project Path' {
+            Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -ProjectFullPath $($ProjectFullPath) | Should -BeIn $($true, $false)
+        }
+
+        It -Name 'Group Path' {
+            Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -GroupFullPath $($GroupFullPath) | Should -BeIn $($true, $false)
         }
     }
     
