@@ -30,30 +30,37 @@ function Close-PSGitLabIssue {
     )
       
     process {
-        foreach ($item in $IID) {
-            $Query = @{
-                query = @"
-            mutation {
-                updateIssue(input: {projectPath: "$($ProjectFullPath)", iid: "$($item)", stateEvent:CLOSE}) {
-                    issue {
-                        id
-                        iid
-                        state
+        $ProjectExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -ProjectFullPath $($ProjectFullPath)
+        if ($ProjectExists -eq $true) {
+            foreach ($item in $IID) {
+                $Query = @{
+                    query = @"
+                mutation {
+                    updateIssue(input: {projectPath: "$($ProjectFullPath)", iid: "$($item)", stateEvent:CLOSE}) {
+                        issue {
+                            id
+                            iid
+                            state
+                        }
+                        errors
                     }
-                    errors
+                }
+"@
+                } | ConvertTo-Json -Compress
+          
+                $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+          
+                if ($response.errors) {
+                    Write-Error -Message $($response.errors.message) -InformationAction Continue
+                }
+                else {
+                    $response.data.updateIssue.issue
                 }
             }
-"@
-            } | ConvertTo-Json -Compress
-      
-            $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-      
-            if ($response.errors) {
-                Write-Error -Message $($response.errors.message) -InformationAction Continue
-            }
-            else {
-                $response.data.updateIssue.issue
-            }
+        }
+        
+        else {
+            Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact gitlab administrator." -InformationAction Continue
         }
     }
 

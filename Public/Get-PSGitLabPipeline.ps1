@@ -27,8 +27,12 @@ function Get-PSGitLabPipeline {
         $ProjectFullPath
     )
     
-    $query = @{
-        query = @"
+    $ProjectExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -ProjectFullPath $($ProjectFullPath)
+
+    if ($ProjectExists -eq $true) {
+        
+        $query = @{
+            query = @"
             query {
                 project(fullPath: "$($ProjectFullPath)") {
                     pipelines(first: 100, after: null) {
@@ -46,13 +50,13 @@ function Get-PSGitLabPipeline {
                     }
                 }
 "@
-    } | ConvertTo-Json 
+        } | ConvertTo-Json 
     
-    $collection = @()
-    while ($true) {
-        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json'     
-        $query = @{
-            query = @"
+        $collection = @()
+        while ($true) {
+            $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json'     
+            $query = @{
+                query = @"
                 query {
                     project(fullPath: "$($ProjectFullPath)") {
                         pipelines(first: 100, after: "$($response.data.project.pipelines.pageInfo.endCursor)") {
@@ -70,12 +74,17 @@ function Get-PSGitLabPipeline {
                         }
                     }
 "@
-        } | ConvertTo-Json 
-        $collection += $response
-        if ($response.data.project.pipelines.pageInfo.hasNextPage -eq $false) {
-            break
+            } | ConvertTo-Json 
+            $collection += $response
+            if ($response.data.project.pipelines.pageInfo.hasNextPage -eq $false) {
+                break
+            }
         }
+        $collection.data.project.pipelines.nodes
     }
-    $collection.data.project.pipelines.nodes
+    else {
+        Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact GitLab administrator" -InformationAction Continue
+    }
+
 }
 
