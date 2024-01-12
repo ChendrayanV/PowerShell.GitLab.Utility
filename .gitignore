@@ -1,4 +1,4 @@
-Tests/script.ps1
+# Tests/script.ps1
 
 config/config.json
 
@@ -6,4 +6,6 @@ assignments
 
 GraphQL/
 
-Tests/*
+
+
+Tests/
