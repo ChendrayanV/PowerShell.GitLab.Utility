@@ -50,7 +50,12 @@ function Get-PSGitLabProject {
 "@
           } | ConvertTo-Json 
           $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-          $response.data.project
+          if($response.data.project) {
+            $response.data.project
+          }
+          else {
+            Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact GitLab administrator." -InformationAction Continue
+          }
         }
       }
   
