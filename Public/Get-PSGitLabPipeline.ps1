@@ -1,41 +1,22 @@
 function Get-PSGitLabPipeline {
-    <#
-    .SYNOPSIS
-        A PowerShell cmdlet to retrieve GitLab issues (Project Scope)
-    .DESCRIPTION
-        A PowerShell cmdlet to retrieve GitLab issues (Project Scope)
-    .NOTES
-        Author : Chendrayan Venkatesan
-        Email  : Chendrayan.Exchange@hotmail.com
-    .LINK
-        https://docs.gitlab.com/ee/api/graphql/reference/#projectissue
-    .EXAMPLE
-        Get-PSGitLabPipeline -OrganizationName 'gitlab.com' -PrivateToken 'XXXXX' -ProjectFullPath 'group/projectfullpath' 
-        
-    #>
-    
-    
     [CmdletBinding()]
     param (
-        [string]
+        [Parameter(Mandatory)]
         $OrganizationName,
 
-        [string]
+        [Parameter(Mandatory)]
         $PrivateToken,
 
-        [string]
+        [Parameter(Mandatory)]
         $ProjectFullPath
     )
-    
-    $ProjectExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -ProjectFullPath $($ProjectFullPath)
 
-    if ($ProjectExists -eq $true) {
-        
+    do {
         $query = @{
             query = @"
             query {
                 project(fullPath: "$($ProjectFullPath)") {
-                    pipelines(first: 100, after: null) {
+                    pipelines(first: 100, after: "$endCursor") {
                             pageInfo {
                                 hasNextPage
                                 endCursor
@@ -50,41 +31,13 @@ function Get-PSGitLabPipeline {
                     }
                 }
 "@
-        } | ConvertTo-Json 
+        } | ConvertTo-Json
     
-        $collection = @()
-        while ($true) {
-            $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json'     
-            $query = @{
-                query = @"
-                query {
-                    project(fullPath: "$($ProjectFullPath)") {
-                        pipelines(first: 100, after: "$($response.data.project.pipelines.pageInfo.endCursor)") {
-                                pageInfo {
-                                    hasNextPage
-                                    endCursor
-                                }
-                                nodes {
-                                    id
-                                    status
-                                    startedAt
-                                    finishedAt
-                                }
-                            }
-                        }
-                    }
-"@
-            } | ConvertTo-Json 
-            $collection += $response
-            if ($response.data.project.pipelines.pageInfo.hasNextPage -eq $false) {
-                break
-            }
-        }
-        $collection.data.project.pipelines.nodes
-    }
-    else {
-        Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact GitLab administrator" -InformationAction Continue
-    }
+        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+        $response.data.project.pipelines.nodes
+        $endCursor = $response.data.project.pipelines.pageInfo.endCursor
+        $hasNextPage = $response.data.project.pipelines.pageInfo.hasNextPage
+
+    } while ($hasNextPage)
 
 }
-

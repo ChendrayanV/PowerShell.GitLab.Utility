@@ -27,45 +27,13 @@ function Get-PSGitLabProjectIssue {
         $ProjectFullPath
     )
     
-    $query = @{
-        query = @"
-            query {
-                project(fullPath: "$($ProjectFullPath)") {
-                    issues (first: 20, after: null) {
-                        pageInfo {
-                            hasNextPage
-                            endCursor
-                        }
-                        nodes {
-                            id
-                            iid
-                            createdAt
-                            closedAt
-                            weight
-                            confidential
-                            state
-                            severity
-                            title
-                            labels {
-                                nodes {
-                                    title
-                                }   
-                            }
-                        }
-                    }
-                }
-            }
-"@
-    } | ConvertTo-Json 
-    $collection = @()
-
-    while ($true) {
-        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+    do {
+        
         $query = @{
             query = @"
                 query {
                     project(fullPath: "$($ProjectFullPath)") {
-                        issues (first: 20, after: "$($response.data.project.issues.pageInfo.endCursor)") {
+                        issues (first: 20, after: "$($endCursor)") {
                             pageInfo {
                                 hasNextPage
                                 endCursor
@@ -91,12 +59,11 @@ function Get-PSGitLabProjectIssue {
                 }
 "@
         } | ConvertTo-Json 
+    
+        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+        $response.data.project.issues.nodes
+        $endCursor = $response.data.project.issues.pageInfo.endCursor
+        $hasNextPage = $response.data.project.issues.pageInfo.hasNextPage
 
-        $collection += $response
-        if ($response.data.project.issues.pageInfo.hasNextPage -eq $false) {
-            break 
-        }
-    }
-    $collection.data.project.issues.nodes
+    } while ($hasNextPage)
 }
-

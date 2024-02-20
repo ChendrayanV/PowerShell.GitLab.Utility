@@ -25,12 +25,13 @@ function Get-PSGitLabProjectBoard {
         [Parameter(Mandatory)]
         $ProjectFullPath
     )
-    
-    $Query = @{
-        query = @"
+
+    do {
+        $Query = @{
+            query = @"
                 query {
                     project(fullPath: "$($ProjectFullPath)") {
-                    boards(first: 5, after: null) {
+                    boards(first: 5, after: "$endCursor") {
                         pageInfo {
                             hasNextPage
                             endCursor
@@ -45,35 +46,13 @@ function Get-PSGitLabProjectBoard {
                 }
               
 "@
-    } | ConvertTo-Json 
-    $collection = @()
-
-    while ($true) {
+        } | ConvertTo-Json 
+    
         $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-        $query = @{
-            query = @"
-                    query {
-                        project(fullPath: "$($ProjectFullPath)") {
-                        boards(first: 5, after: "$($response.data.project.boards.pageInfo.endCursor)") {
-                            pageInfo {
-                                hasNextPage
-                                endCursor
-                            }
-                            nodes {
-                                id
-                                name
-                                createdAt
-                            }
-                        }
-                        }
-                    }
-"@
-        } | ConvertTo-Json -Compress
+        $response.data.project.boards.nodes
+        $endCursor = $response.data.project.boards.pageInfo.endCursor
+        $hasNextPage = $response.data.project.boards.pageInfo.hasNextPage 
 
-        $collection += $response
-        if ($response.data.project.boards.pageInfo.hasNextPage -eq $false) {
-            break 
-        }
-    }
-    $collection.data.project.boards.nodes
+    } while ($hasNextPage)
+
 }

@@ -32,13 +32,13 @@ function Get-PSGitLabCICDVariable {
   
   switch ($PSCmdlet.ParameterSetName) {
     'Project' {
-      $ProjectExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -ProjectFullPath $($ProjectFullPath)
-      if ($ProjectExists -eq $true) {
+      do {
+        
         $query = @{
           query = @"
         query {
             project(fullPath: "$($ProjectFullPath)") {
-              ciVariables(first: 10, after: null) {
+              ciVariables(first: 10, after: "$($endCursor)") {
                 pageInfo {
                   hasNextPage
                   endCursor
@@ -56,53 +56,22 @@ function Get-PSGitLabCICDVariable {
           }
 "@
         } | ConvertTo-Json 
-        $collection = @()
+        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+        $response.data.project.ciVariables.nodes
+        $endCursor = $response.data.project.ciVariables.pageInfo.endCursor
+        $hasNextPage = $response.data.project.ciVariables.pageInfo.hasNextPage
 
-        while ($true) {
-          $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-          $query = @{
-            query = @"
-                query {
-                    project(fullPath: "$($ProjectFullPath)") {
-                    ciVariables(first: 10, after: "$($response.data.project.ciVariables.pageInfo.endCursor)") {
-                        pageInfo {
-                        hasNextPage
-                        endCursor
-                        }
-                        nodes {
-                        key
-                        value
-                        masked
-                        environmentScope
-                        protected
-                        variableType
-                        }
-                    }
-                    }
-                }
-"@
-          } | ConvertTo-Json 
-
-          $collection += $response
-          if ($response.data.project.ciVariables.pageInfo.hasNextPage -eq $false) {
-            break 
-          }
-        }
-        $collection.data.project.ciVariables.nodes
-      }
-      else {
-        Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact the GitLab administrator" -InformationAction Continue
-      }
+      } while ($hasNextPage)
     }
 
     'Group' {
-      $GroupExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -GroupFullPath $($GroupFullPath)
-      if ($GroupExists -eq $true) {
+      do {
+        
         $query = @{
           query = @"
         query {
             group(fullPath: "$($GroupFullPath)") {
-              ciVariables(first: 10, after: null) {
+              ciVariables(first: 10, after: "$($endCursor)") {
                 pageInfo {
                   hasNextPage
                   endCursor
@@ -120,43 +89,12 @@ function Get-PSGitLabCICDVariable {
           }
 "@
         } | ConvertTo-Json 
-        $collection = @()
+        $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+        $response.data.group.ciVariables.nodes
+        $endCursor = $response.data.group.ciVariables.pageInfo.endCursor
+        $hasNextPage = $response.data.group.ciVariables.pageInfo.hasNextPage
 
-        while ($true) {
-          $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-          $query = @{
-            query = @"
-                query {
-                    group(fullPath: "$($GroupFullPath)") {
-                    ciVariables(first: 10, after: "$($response.data.group.ciVariables.pageInfo.endCursor)") {
-                        pageInfo {
-                        hasNextPage
-                        endCursor
-                        }
-                        nodes {
-                        key
-                        value
-                        masked
-                        environmentScope
-                        protected
-                        variableType
-                        }
-                    }
-                    }
-                }
-"@
-          } | ConvertTo-Json 
-
-          $collection += $response
-          if ($response.data.group.ciVariables.pageInfo.hasNextPage -eq $false) {
-            break 
-          }
-        }
-        $collection.data.group.ciVariables.nodes
-      }
-      else {
-        Write-Warning -Message "The project $($GroupFullPath) is not found. Please contact the GitLab administrator" -InformationAction Continue
-      }
+      } while ($hasNextPage)
     }
 
     default {
@@ -164,3 +102,5 @@ function Get-PSGitLabCICDVariable {
     }
   }
 }
+
+# Get-PSGitLabCICDVariable -OrganizationName 'gitlab.com' -PrivateToken 'glpat-39ZmznjESiztLVP3Pbzz' -ProjectFullPath "cloud-warriors/PowerShell.GitLab.Utility"

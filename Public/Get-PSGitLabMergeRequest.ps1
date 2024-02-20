@@ -108,13 +108,13 @@ function Get-PSGitLabMergeRequest {
         }
 
         'Group' {
-            $GroupExists = (Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -GroupFullPath $($GroupFullPath) )
-            if ($GroupExists -eq $true) {
+            do {
+        
                 $query = @{
                     query = @"
                         query {
                             group(fullPath:"$($GroupFullPath)") {
-                            mergeRequests(includeSubgroups:true,first: 5, after: null) {
+                            mergeRequests(includeSubgroups:true,first: 99, after: "$($endCursor)") {
                                 pageInfo {
                                     hasNextPage
                                     endCursor
@@ -138,54 +138,15 @@ function Get-PSGitLabMergeRequest {
                         }
 "@
                 } | ConvertTo-Json
-                $collection = @()
     
-                while ($true) {
-                    $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-                    
-                    $query = @{
-                        query = @"
-                            query {
-                                group(fullPath:"$($GroupFullPath)") {
-                                mergeRequests(includeSubgroups:true,first: 5, after: "$($response.data.group.mergeRequests.pageInfo.endCursor)") {
-                                    pageInfo {
-                                        hasNextPage
-                                        endCursor
-                                    }
-                                    nodes {
-                                        id
-                                        iid
-                                        createdAt
-                                        state
-                                        approved
-                                        author {
-                                            name
-                                        }
-                                        project {
-                                            id
-                                            name
-                                        }
-                                    }
-                                }
-                                }
-                            }
-"@
-                    } | ConvertTo-Json
-    
-                    $collection += $response
-                    if ($response.data.group.mergeRequests.pageInfo.hasNextPage -eq $false) {
-                        break
-                    }
-                }
-                $collection.data.group.mergeRequests.nodes
-            }
+                $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+                $response.data.group.mergeRequests.nodes
+                $endCursor = $response.data.group.mergeRequests.endCursor
+                $hasNextPage = $response.data.group.mergeRequests.hasNextPage
 
-            else {
-                Write-Warning -Message "The group $($GroupFullPath) is not found. Contact gitlab administrator." -InformationAction Continue
-            }
+            } while ($hasNextPage)
 
         }
-
         
     }
 

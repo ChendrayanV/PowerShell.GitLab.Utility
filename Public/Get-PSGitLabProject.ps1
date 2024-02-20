@@ -20,128 +20,41 @@ function Get-PSGitLabProject {
     $OrganizationName,
 
     [Parameter(Mandatory)]
-    $PrivateToken,
+    $PrivateToken
 
-    [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName, ParameterSetName = 'Project', HelpMessage = 'Full Path of the Project - Example: Group/Project')]
-    [string[]]
-    $ProjectFullPath,
 
-    [Parameter(Mandatory, ParameterSetName = 'Group')]
-    $GroupFullPath
   )
 
-  
-
-  process {
-    switch ($PSCmdlet.ParameterSetName) {
-      'Project' {
-        foreach ($Project in $ProjectFullPath) {
-          $query = @{
-            query = @"
-            query {
-              project(fullPath:"$($Project)") {
+  do {
+    $query = @{
+      query = @"
+          query {
+            projects(first: 99, after: "$endCursor",membership: true) {
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+              nodes {
                 id
                 name
+                nameWithNamespace
                 archived
                 createdAt
                 lastActivityAt
-              }
-            }
-"@
-          } | ConvertTo-Json 
-          $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-          if($response.data.project) {
-            $response.data.project
-          }
-          else {
-            Write-Warning -Message "The project $($ProjectFullPath) is not found. Please contact GitLab administrator." -InformationAction Continue
-          }
-        }
-      }
-  
-      'Group' {
-        $checkGroupExists = Test-PSGitLabObject -OrganizationName $($OrganizationName) -PrivateToken $($PrivateToken) -GroupFullPath $($GroupFullPath)
-        if ($checkGroupExists -eq $true) {
-          $Query = @{
-            query = @"
-          query {
-              group(fullPath: "$($GroupFullPath)") {
-                projects(includeSubgroups: true,first:5, after: null) {
-                  pageInfo {
-                    hasNextPage
-                    endCursor
-                  }
-                  nodes {
-                    id
-                    name
-                    path
-                    createdAt
-                    lastActivityAt
-                    languages {
-                      name
-                    }
-                    importStatus
-                    archived
-                    issueStatusCounts {
-                      all
-                      closed
-                      opened
-                    }
-                  }
-                }
-              }
-            }
                 
-"@
-          } | ConvertTo-Json 
-          $collection = @()
-  
-          while ($true) {
-            $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
-          
-            $Query = @{
-              query = @"
-              query {
-                  group(fullPath: "$($GroupFullPath)") {
-                    projects(includeSubgroups: true,first:5, after: "$($response.data.group.projects.pageInfo.endCursor)") {
-                      pageInfo {
-                        hasNextPage
-                        endCursor
-                      }
-                      nodes {
-                        id
-                        name
-                        path
-                        createdAt
-                        lastActivityAt
-                        languages {
-                          name
-                        }
-                        importStatus
-                          archived
-                          issueStatusCounts {
-                              all
-                              closed
-                              opened
-                            }
-                      }
-                    }
-                  }
-                }
-                    
-"@
-            } | ConvertTo-Json -Compress
-            $collection += $response
-            if ($response.data.group.projects.pageInfo.hasNextPage -eq $false) {
-              break 
+              }
             }
           }
-          $collection.data.group.projects.nodes
-        }
-        else {
-          Write-Warning -Message "The group $($GroupFullPath) is not found. Contact the GitLab administrator" -InformationAction Continue
-        }
-      }
-    }
-  }
+
+                  
+"@
+    } | ConvertTo-Json 
+  
+    $response = Invoke-RestMethod -Uri "https://$($OrganizationName)/api/graphql" -Headers @{Authorization = "Bearer $($PrivateToken)" } -Method Post -Body $query -ContentType 'application/json' 
+    $response.data.projects.nodes
+    $endCursor = $response.data.projects.pageInfo.endCursor
+    $hasNextPage = $response.data.projects.pageInfo.hasNextPage
+
+  } while ($hasNextPage)
+
 }
