@@ -5,29 +5,27 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-PSGitLabCICDSetting
+# Compare-PSGitLabProject
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+A PowerShell function to compare two different project (Scalar Properties / fields)
 
 ## SYNTAX
 
 ```
-Get-PSGitLabCICDSetting [-OrganizationName] <Object> [-PrivateToken] <Object> [-ProjectFullPath] <String[]>
- [<CommonParameters>]
+Compare-PSGitLabProject [-OrganizationName] <Object> [-PrivateToken] <Object>
+ [-ReferenceProjectFullPath] <String> [-DifferenceProjectFullPath] <String[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+A PowerShell function to compare two different project (Scalar Properties / fields)
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
 ```
-
-{{ Add example description here }}
+Compare-PSGitLabProject -OrganizationName 'gitlab.com' -PrivateToken 'Token' -ReferenceProjectFullPath 'group/project1' -DifferenceProjectFullPath 'group/project2'
+```
 
 ## PARAMETERS
 
@@ -40,7 +38,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -55,14 +53,29 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ProjectFullPath
-{{ Fill ProjectFullPath Description }}
+### -ReferenceProjectFullPath
+{{ Fill ReferenceProjectFullPath Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -DifferenceProjectFullPath
+{{ Fill DifferenceProjectFullPath Description }}
 
 ```yaml
 Type: String[]
@@ -70,9 +83,9 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 4
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -81,11 +94,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String[]
-
 ## OUTPUTS
 
-### System.Object
 ## NOTES
+Author: Chendrayan Venkatesan
+Email : chendrayan.exchange@hotmail.com
 
 ## RELATED LINKS
+
+[Specify a URI to a help page, this will show when Get-Help -Online is used.]()
+
